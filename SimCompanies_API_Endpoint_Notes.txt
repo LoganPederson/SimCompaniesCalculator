@@ -1,0 +1,64 @@
+Encyclopedia/DB Identifiers -> https://www.simcompanies.com/api/v4/en/0/encyclopedia/resources/
+
+Specific Resource Data
+https://www.simcompanies.com/api/v4/en/0/encyclopedia/resources/0/3/
+
+Market&Pricing per DB listings -> 
+https://www.simcompanies.com/api/v3/market/0/66/
+
+All Building Values
+https://www.simcompanies.com/api/v3/0/buildings/1/
+
+Building Values Users (need to figure out how to send auth) 
+https://www.simcompanies.com/api/v2/companies/me/buildings/
+
+Building Values Per Building
+https://www.simcompanies.com/api/v3/0/encyclopedia/buildings/k/
+
+Warehouse Stock
+https://www.simcompanies.com/api/v2/resources/
+
+Data About Me 
+https://www.simcompanies.com/api/v2/companies/me/
+
+Data About Me (building lvl in image name)
+https://www.simcompanies.com/api/v2/companies-by-company/0/SinlessMirror/
+
+Exectutives? returns nothing right now:
+https://www.simcompanies.com/api/v2/companies/2367901/executives/
+
+Returns Empty
+https://www.simcompanies.com/api/v2/companies/2367901/tags/
+
+Empty
+https://www.simcompanies.com/api/v2/newspaper/articles-by-author/2367901/
+
+Notes
+https://www.simcompanies.com/api/v2/companies/me/note/2367901/
+
+
+
+1. determine database_DB number for url insertion
+2. GET from url using specific item db number ie "3" for apples
+3. use response to generate dictionary 
+
+item_dict = {}
+for item in data:
+    item_dict[item['name']] = Item(item['name'], item['db_letter'], item['price']...)
+
+4. use dictionary to create class for resource *necessary?*
+5. insert class as row in "items" table
+
+
+
+
+
+
+buildings page format = name, image, cost, costUnits, wages, secondsToBuild, category, kind, robotsNeeded, realmAvailable, production, retail
+
+
+
+production:
+	resource:
+		name:
+		image:, db_letter (#), transportation(#), retailable(bool), research(bool), realmAvailable(bool), anHour(#)
