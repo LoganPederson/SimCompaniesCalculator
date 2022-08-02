@@ -1,0 +1,14 @@
+# local database
+simcompaniesDB
+
+# venv directories
+Scripts
+Lib
+Lib\site-packages
+
+# venv config
+pyvenv.cfg
+
+# intelisense config
+.vscode
+.vscode\c_cpp_properties.json
