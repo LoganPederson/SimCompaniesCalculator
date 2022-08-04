@@ -1,5 +1,5 @@
 
-from sqlalchemy import ARRAY, Column, ForeignKey, String, Integer
+from sqlalchemy import ARRAY, Column, ForeignKey, String, Integer, Boolean
 from base import Base, Session, engine
 import json, requests
 
@@ -18,7 +18,7 @@ class Building(Base):
     category = Column(String)
     kind = Column(String)
     robotsNeeded = Column(Integer)
-    realmAvailable = Column(Integer)
+    realmAvailable = Column(Boolean)
 
     def __init__(self, name, image, cost, costUnits, wages, secondsToBuild, category, kind, robotsNeeded, realmAvailable):
         self.name = name
@@ -31,17 +31,6 @@ class Building(Base):
         self.kind = kind
         self.robotsNeeded = robotsNeeded
         self.realmAvailable = realmAvailable
-
-    def __init__(self, name, image, db_letter, transportation, retailable, research, realmAvailable, anHour, parentBuilding):
-        self.name = name
-        self.image = image
-        self.db_letter = db_letter
-        self.transportation = transportation
-        self.retailable = retailable
-        self.research = research
-        self.realmAvailable = realmAvailable
-        self.anHour = anHour
-        self.parentBuilding = parentBuilding
 
 
 Base.metadata.create_all(engine) # This method will issue queries that first check for the existence of each individual table, and if not found will issue the CREATE statements
@@ -73,19 +62,11 @@ def printAllBuildings():
     for building in session.query(Building.production).all():
         print(building)
 
-# query all rows of table Production that have a parentBuilding of "Factory"
-def printFactoryProduction():
-    for production in session.query(Production).filter(Production.parentBuilding == "Factory").all():
-        print(production.name)
-
-
 def printAllBuildingNames():
     for building in session.query(Building).all():
         print(building.name)
 
 
 
+populateBuildingsTable()
 printAllBuildingNames()
-
-#populateBuildingsTable()
-#populateProductionTable()

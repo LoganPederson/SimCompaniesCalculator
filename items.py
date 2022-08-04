@@ -1,8 +1,8 @@
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, Boolean, Float
 from base import Base, Session, engine
 from buildings import Building
 import json, requests
-
+from time import sleep
 
 #- Item class for each resource with properties within
 class Item(Base): 
@@ -11,19 +11,19 @@ class Item(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     db_letter = Column(String)
-    transportation = Column(Integer)
-    retailable = Column(Integer)
-    research = Column(Integer)
-    realmAvailable = Column(Integer)
-    producedAnHour = Column(Integer)
-    averageRetailPrice = Column(Integer)
-    marketSaturation = Column(Integer)
+    transportation = Column(Float)
+    retailable = Column(Boolean)
+    research = Column(Boolean)
+    realmAvailable = Column(Boolean)
+    producedAnHour = Column(Float)
+    averageRetailPrice = Column(Float)
+    marketSaturation = Column(Float)
     marketSaturationLabel = Column(String)
     retailModeling = Column(String)
     neededFor = Column(String)
     producedFrom = Column(String)
     producedAt = Column(String)
-    lowestMarketPrice = Column(Integer)
+    lowestMarketPrice = Column(Float)
 
 
 
@@ -48,13 +48,13 @@ class Item(Base):
 
 #- generate database schema
 Base.metadata.create_all(engine)
-
 #- create a new session
 session = Session()
 
 #- GET request from API for specified resource db_letter
 def getResourceData(db_letter):
-    url = "https://www.simcompanies.com/api/v4/en/0/encyclopedia/resources/0/{}/".format(db_letter)  
+    url = "https://www.simcompanies.com/api/v4/en/0/encyclopedia/resources/0/{}/".format(db_letter)
+    print(url)
     response = requests.get(url)
     resourceData = json.loads(response.text)
     return resourceData
@@ -64,7 +64,6 @@ def getMarketData(db_letter):
     response = requests.get(url)
     marketData = json.loads(response.text)
     return marketData
-
 
 #- loop through commodity list and get data from API
 def populateItemsTable():
@@ -96,7 +95,6 @@ def populateItemsTable():
                     amountToPrint = len(resourceData["producedFrom"])
                     x = 0
                     for item in resourceData["producedFrom"]:
-                        print(resourceData["producedFrom"][x])
                         if x < amountToPrint:
                             producedFromString = producedFromString + resourceData["producedFrom"][x]["resource"]["name"] + "+"+str(resourceData["producedFrom"][x]["amount"])+"-"
                             x = x + 1
@@ -135,7 +133,6 @@ def populateItemsTable():
                     amountToPrint = len(resourceData["producedFrom"])
                     x = 0
                     for item in resourceData["producedFrom"]:
-                        print(resourceData["producedFrom"][x])
                         if x < amountToPrint:
                             producedFromString = producedFromString + resourceData["producedFrom"][x]["resource"]["name"] + "+"+str(resourceData["producedFrom"][x]["amount"])+"-"
                             x = x + 1
@@ -174,7 +171,6 @@ def populateItemsTable():
                     amountToPrint = len(resourceData["producedFrom"])
                     x = 0
                     for item in resourceData["producedFrom"]:
-                        print(resourceData["producedFrom"][x])
                         if x < amountToPrint:
                             producedFromString = producedFromString + resourceData["producedFrom"][x]["resource"]["name"] + "+"+str(resourceData["producedFrom"][x]["amount"])+"-"
                             x = x + 1
@@ -187,7 +183,7 @@ def populateItemsTable():
             lowestMarketPrice = marketData[0]["price"]
             newItem = Item(name, db_letter, transportation, retailable, research, realmAvailable, producedAnHour, averageRetailPrice, marketSaturation, marketSaturationLabel, retailModeling, neededFor, producedFrom, producedAt, lowestMarketPrice)
             session.add(newItem)
-        if(i >= 100): # 100 to 113
+        if(i >= 100 and i <= 113): # 100 to 113
             resourceData = getResourceData(i)
             marketData = getMarketData(i)
             name = resourceData["name"]
@@ -213,7 +209,6 @@ def populateItemsTable():
                     amountToPrint = len(resourceData["producedFrom"])
                     x = 0
                     for item in resourceData["producedFrom"]:
-                        print(resourceData["producedFrom"][x])
                         if x < amountToPrint:
                             producedFromString = producedFromString + resourceData["producedFrom"][x]["resource"]["name"] + "+"+str(resourceData["producedFrom"][x]["amount"])+"-"
                             x = x + 1
@@ -226,7 +221,9 @@ def populateItemsTable():
             lowestMarketPrice = marketData[0]["price"]
             newItem = Item(name, db_letter, transportation, retailable, research, realmAvailable, producedAnHour, averageRetailPrice, marketSaturation, marketSaturationLabel, retailModeling, neededFor, producedFrom, producedAt, lowestMarketPrice)
             session.add(newItem)
-        i+=1
+        i = i+1
+
+
 
 # query for all neededFor items
 def getNeededForItems(): #getting close
@@ -267,31 +264,34 @@ def calculateProfitPerHourPerItem(buildingName, buildingLevel, productionModifie
     itemNamesThatCanBeProducuedFromBuilding = session.query(Item).all()
     buildingsTable = session.query(Building).all()
     profitDict = {}
-    for item in itemNamesThatCanBeProducuedFromBuilding:
-        if item.producedAt == buildingName:
+    for item in itemNamesThatCanBeProducuedFromBuilding: # for each item in items table
+        if item.producedAt == buildingName: # if item is producable from specified building
             print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'+item.name+'^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
-            #print(item.name+': '+str(producedFromMasterList))
-            producedFromStringList = splitProducedFromString(item.name)
-            print(producedFromStringList)
+            producedFromStringList = splitProducedFromString(item.name) #passes item.name to function that will split the items producedFrom property by "-" ex: ['seeds+4','water+1']
+            print('producedFromStringList = '+str(producedFromStringList))
             totalResourceSourcingCost = 0
             for listItem in producedFromStringList: # ex: [seeds+1,water+4] resourceName+amountNeeded
-                if listItem != "":
+                if listItem != "": # gets rid of the empty string which all lists contain
                     resourceNameAndAmount = listItem.split("+") # ex: [seeds, 1] [water, 4]
                     resourceName = resourceNameAndAmount[0]
                     resourceAmountNeeded = resourceNameAndAmount[1]
-                    print(resourceName)
+                    print("resourceName: "+resourceName)
                     print("amount needed: "+str(resourceAmountNeeded))
                     print("lowest market price found: " + str(getLowestMarketPrice(resourceName)))
-                    costIncreaseTimesAmountNeeded = (float(getLowestMarketPrice(resourceName))+(float(getLowestMarketPrice(resourceName))*0.03))*float(resourceAmountNeeded) # lowest market price * amount needed to produce item = total sourcing cost from market of this resource for producing 1 unit of item, including 3% market fee on purchase (haven't factored in transportaiton)
-                    totalResourceSourcingCost = totalResourceSourcingCost + costIncreaseTimesAmountNeeded
-            sourcingCostPerHour = item.producedAnHour * totalResourceSourcingCost
-            print("----------------------costPerHour to produce "+str(item.producedAnHour)+" units of "+ item.name + " = " + str(sourcingCostPerHour))
+                    lowestMarketPriceWith3Fee = (float(getLowestMarketPrice(resourceName))+(float(getLowestMarketPrice(resourceName))*0.03))
+                    print("Lowest Market Price Accounting For 3 Fee: "+str(lowestMarketPriceWith3Fee))
+                    marketCostOfSourcingResource = lowestMarketPriceWith3Fee * float(resourceAmountNeeded) # lowest market price * amount needed to produce item = total sourcing cost from market of this resource for producing 1 unit of item, including 3% market fee on purchase (haven't factored in transportaiton)
+                    totalResourceSourcingCost = totalResourceSourcingCost + marketCostOfSourcingResource
+            #if totalResourceSourcingCost == 0:
+            print("----------------------costPerHour to source all resources needed to produce "+str(item.producedAnHour*buildingLevel)+" units of "+ item.name + " = " + str(totalResourceSourcingCost))
             # get wages from building and use sourcing cost to find profit per item
             for building in buildingsTable:
                 if building.name == buildingName:
-                    print("BUILDING WAGES --------------------- "+str(building.wages))
-                    productionCosts = ((sourcingCostPerHour + (building.wages * buildingLevel)) + ((building.wages*buildingLevel)*administrationCostPercentage))
-                    profitPerHour = (getLowestMarketPrice(item.name)*item.producedAnHour) - productionCosts
+                    print("BUILDING WAGES --------------------- "+str(building.wages*buildingLevel))
+                    productionCosts = ((totalResourceSourcingCost + (building.wages * buildingLevel)) + ((building.wages*buildingLevel)*administrationCostPercentage))
+                    print("-----------------------------------Production Cost of Sourcing AND Wages AND Admin Overhead Percentage =: "+str(productionCosts))
+                    print("Items Produced An Hour: "+str(item.producedAnHour*buildingLevel))
+                    profitPerHour = (getLowestMarketPrice(item.name)*(item.producedAnHour*buildingLevel)) - productionCosts
                     profitDict[item.name]=profitPerHour
                     print("---------------------------------------------Profit per hour!!! = "+str(profitPerHour))
     print(profitDict)
@@ -302,15 +302,20 @@ def removeItemsTable():
     session.query(Item).delete()
     session.commit()
 
+def getItem():
+    items = session.query(Item).all()
+    for item in items:
+        if item.name == "Mining research":
+            print(item.name)
+            print(item.producedAnHour)
 
 
 
-calculateProfitPerHourPerItem('Physics laboratory', 1, 1, 0) 
+#calculateProfitPerHourPerItem('Physics laboratory', 2, 1, .01) 
 
 #removeItemsTable()
 #populateItemsTable()
-
-
+getItem()
 
 #- commit and close session
 session.commit()
