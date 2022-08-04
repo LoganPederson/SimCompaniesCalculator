@@ -1,5 +1,6 @@
 # local database
 simcompaniesDB
+local_settings.py
 local_settings
 
 # venv directories
