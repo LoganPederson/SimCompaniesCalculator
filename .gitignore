@@ -1,0 +1,16 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Backend
+/Backend/__pycache__
+/Backend/local_settings.py
+
+# Frontend
+/Frontend/node_modules
+
+# Misc
+/Include
+/Lib
+/Scripts
+/install_nvm.sh
+/pyvenv.cfg
+/reactCreate.py
