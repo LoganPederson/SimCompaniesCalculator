@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Backend
@@ -15,25 +14,3 @@
 /install_nvm.sh
 /pyvenv.cfg
 /reactCreate.py
-=======
-# local database
-simcompaniesDB
-local_settings.py
-local_settings
-
-# venv directories
-Scripts
-Lib
-Lib\site-packages
-
-# venv config
-pyvenv.cfg
-__pycache__
-
-# intelisense config
-.vscode
-.vscode\c_cpp_properties.json
-
-
-
->>>>>>> 2c99b6d14ff99f2dd946daf81748aab109c954fb
